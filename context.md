@@ -217,6 +217,50 @@ Mọi chức năng liên quan tới đăng nhập, quản lý phiên làm việc
   ```
 - **Lưu ý khi sử dụng**: Phương thức truy cập dữ liệu của record sẽ có tên trùng với tên trường (ví dụ: `request.email()` thay vì `request.getEmail()`). Hãy cập nhật các Controller và Service tương ứng.
 
+### 6.6. Quy chuẩn Ánh xạ Thực thể với DTO sử dụng MapStruct (Automap)
+Để chuyển đổi dữ liệu qua lại giữa **Database Entity** và **DTO (Java Record)** một cách tối ưu và đồng nhất, hệ thống bắt buộc sử dụng thư viện **MapStruct** cho toàn bộ các trường hợp ánh xạ.
+
+#### 1. Nguyên tắc hoạt động & Ưu điểm:
+- **Compile-time Code Generation**: MapStruct tạo mã nguồn ánh xạ Java thuần túy (Plain Java code) ngay khi ứng dụng được biên dịch (build-time).
+- **Hiệu năng vượt trội**: Hoàn toàn không sử dụng cơ chế phản chiếu (Java Reflection) chậm chạp ở runtime như ModelMapper. Hiệu năng ánh xạ của MapStruct tương đương với việc viết code `getter/setter` thủ công nhưng loại bỏ hoàn toàn code boilerplate dư thừa.
+- **Phát hiện lỗi sớm**: Mọi lỗi ánh xạ sai kiểu dữ liệu, sai tên trường hoặc thiếu ánh xạ sẽ được báo ngay tại thời điểm biên dịch ứng dụng thay vì gây lỗi âm thầm ở runtime.
+
+#### 2. Các thực thể (Entities) và DTOs đơn giản có thể sử dụng Automap:
+Đối với các cặp Entity và DTO có cấu trúc đơn giản (các trường tương ứng trùng tên và kiểu dữ liệu), ta chỉ cần khai báo interface Mapper và để MapStruct tự động sinh code:
+- **User** ⇄ **UserResponse**: Ánh xạ thông tin người dùng cơ bản (họ tên, email, vai trò), tự động bỏ qua các trường nhạy cảm như `password` trước khi gửi về client.
+- **Movie** ⇄ **MovieResponse / MovieRequest**: Ánh xạ các trường thông tin phim cơ bản (`title`, `description`, `duration`, `releaseDate`...).
+- **Cinema** ⇄ **CinemaResponse**: Ánh xạ thông tin rạp chiếu (`name`, `address`...).
+- **Seat** ⇄ **SeatResponse**: Ánh xạ sơ đồ ghế (`row`, `number`, `type`, `status`...).
+- **Promotion** ⇄ **PromotionResponse**: Ánh xạ các thông tin chương trình khuyến mãi và mã ưu đãi.
+
+#### 3. Ví dụ minh họa (Entity sang Java Record DTO):
+Khai báo Interface Mapper trong package `com.cinema.vncinema.mapper` với annotation `@Mapper(componentModel = "spring")` để Spring quản lý Mapper này như một Spring Bean (cho phép `@Autowired` hoặc Constructor Injection trong Service):
+
+```java
+package com.cinema.vncinema.mapper;
+
+import com.cinema.vncinema.entity.Movie;
+import com.cinema.vncinema.dto.response.MovieResponse;
+import com.cinema.vncinema.dto.request.MovieCreateRequest;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+
+@Mapper(componentModel = "spring")
+public interface MovieMapper {
+
+    // 1. Ánh xạ từ Entity sang Java Record DTO
+    MovieResponse toMovieResponse(Movie movie);
+
+    // 2. Ánh xạ từ Request DTO sang Entity để lưu Database
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    Movie toMovie(MovieCreateRequest request);
+}
+```
+
+*Lưu ý:* MapStruct hỗ trợ hoàn hảo cho **Java Record**. Nó sẽ tự động biên dịch và ánh xạ sang constructor của Record mà bạn không cần cấu hình thêm gì.
+
 ---
 
 ## 7. Quy chuẩn Phát triển Frontend (Frontend Design Standards)
