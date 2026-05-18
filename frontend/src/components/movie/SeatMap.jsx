@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { cn } from "../utils/cn";
-import { generateSeats } from "../data/mockData";
+import { cn } from "../../utils/cn";
+import { generateSeats } from "../../data/mockData";
 
 export default function SeatMap({ selectedSeats, onSeatSelect }) {
   const [seats, setSeats] = useState([]);

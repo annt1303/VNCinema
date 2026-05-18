@@ -15,6 +15,10 @@ public enum ErrorCode {
     UNAUTHORIZED(1007, "You do not have permission to access this resource", HttpStatus.FORBIDDEN),
     RESOURCE_NOT_FOUND(1008, "Requested resource not found", HttpStatus.NOT_FOUND),
     INVALID_ARGUMENT(1009, "Invalid request argument", HttpStatus.BAD_REQUEST),
+    INVALID_OTP(1010, "Invalid or expired OTP", HttpStatus.BAD_REQUEST),
+    EMAIL_NOT_VERIFIED(1011, "Email has not been verified with OTP", HttpStatus.BAD_REQUEST),
+    INVALID_CREDENTIALS(1012, "Incorrect email or password", HttpStatus.BAD_REQUEST),
+    REFRESH_TOKEN_EXPIRED(1013, "Refresh token has expired, please log in again", HttpStatus.UNAUTHORIZED),
     ;
 
     private final int code;

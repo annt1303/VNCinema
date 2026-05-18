@@ -36,7 +36,7 @@ Với một hệ thống đặt vé xem phim, tính toàn vẹn của dữ liệ
 - [ ] Tính năng chưa thực hiện (hoặc đang phát triển).
 
 ### 3.1. Dành cho Khách hàng (User Frontend - React.js)
-- [ ] **Xác thực người dùng (Authentication)**: Đăng nhập/Đăng ký (Email/Password, Google/Facebook Login) sử dụng JWT.
+- [x] **Xác thực người dùng (Authentication)**: Đăng nhập/Đăng ký (Email/Password) sử dụng JWT. Luồng đăng ký bằng OTP, lưu Refresh Token ở HttpOnly Cookie.
 - [ ] **Quản lý tài khoản cá nhân (Profile)**: Cập nhật thông tin cá nhân, đổi mật khẩu.
 - [ ] **Lịch sử mua vé (Purchase History & E-Ticket)**: Quản lý danh sách các vé đã mua, xem trạng thái vé (chưa dùng, đã dùng, đã hủy). Tích hợp hiển thị Mã QR (QR Code) để quét.
 - [ ] **Real-time Seat Booking**: Tích hợp WebSocket (qua Spring Boot STOMP) để khi một người đang giữ ghế, những người khác đang xem sơ đồ phòng chiếu sẽ thấy ghế đó chuyển sang màu xám.
@@ -45,7 +45,7 @@ Với một hệ thống đặt vé xem phim, tính toàn vẹn của dữ liệ
 
 ### 3.2. Dành cho Backend (Spring Boot)
 - [ ] **RESTful APIs**: Cung cấp API chuẩn cho Frontend gọi dữ liệu.
-- [ ] **Spring Security**: Bảo mật API bằng JWT, phân quyền chi tiết (Role: ADMIN, USER).
+- [x] **Spring Security**: Bảo mật API bằng JWT, phân quyền chi tiết (Role: ADMIN, USER).
 - [ ] **Concurrency / Transaction Management**: Xử lý logic đặt vé an toàn, ngăn chặn triệt để tình trạng *Double-booking* (đặt trùng vé).
 - [ ] **Email/SMS Service**: Tự động gửi email xác nhận chứa mã QR vé xem phim sau khi thanh toán thành công.
 - [ ] **Job Scheduler**: Các tác vụ chạy ngầm như tự động hủy các vé giữ chỗ quá hạn 10 phút mà chưa thanh toán, tự động cập nhật trạng thái phim (Sắp chiếu -> Đang chiếu).
@@ -144,6 +144,10 @@ public class Movie extends BaseEntity {
 Tất cả các REST Controller khi trả dữ liệu về phía Frontend bắt buộc phải đóng gói kết quả trong wrapper [ApiResponse.java](file:///d:/Projects/vncinema/src/main/java/com/cinema/vncinema/dto/response/ApiResponse.java).
 - Mã code thành công mặc định là `1000`.
 - Sử dụng các static helper methods `ApiResponse.success(...)` để trả kết quả thành công và `ApiResponse.error(...)` cho kết quả thất bại.
+- **Quy chuẩn thông điệp (Response Messages)**:
+  * Mọi thông điệp thành công/thất bại trả về bắt buộc phải được viết bằng **tiếng Anh** để chuẩn hóa API.
+  * Nghiêm cấm viết trực tiếp chuỗi ký tự (hardcode string literals) trong các REST Controllers. Tất cả thông điệp phải được khai báo tập trung trong các **tập tin hằng số riêng biệt** (ví dụ: [AuthMessages.java](file:///d:/Projects/vncinema/src/main/java/com/cinema/vncinema/constant/AuthMessages.java)) thuộc gói `com.cinema.vncinema.constant` để tiện quản lý và quốc tế hóa sau này.
+  * Đối với các Endpoint không yêu cầu dữ liệu phản hồi (chỉ cần báo thành công), hãy trả về kiểu `ApiResponse<Void>` và sử dụng phương thức nạp chồng `ApiResponse.success(String message)` để loại bỏ hoàn toàn trường `result` khỏi chuỗi JSON đầu ra.
 - **Ví dụ Controller:**
 ```java
 @RestController
@@ -153,7 +157,7 @@ public class MovieController {
     @GetMapping("/{id}")
     public ApiResponse<MovieResponse> getMovie(@PathVariable Long id) {
         MovieResponse movie = movieService.getMovieById(id);
-        return ApiResponse.success("Lấy thông tin phim thành công", movie);
+        return ApiResponse.success(MovieMessages.GET_MOVIE_SUCCESS, movie);
     }
 }
 ```
@@ -172,3 +176,66 @@ Hệ thống sử dụng cơ chế xử lý lỗi tập trung thông qua [Global
    private String password;
    ```
 
+### 6.4. Quy chuẩn Phát triển và Bảo mật Xác thực (Authentication & Security Standards)
+Mọi chức năng liên quan tới đăng nhập, quản lý phiên làm việc và bảo vệ tài nguyên bắt buộc phải tuân theo các quy định nghiêm ngặt:
+1. **Quản lý Token (Double Token System)**:
+   * **Access Token**: Được lưu ở bộ nhớ tạm (In-memory) của ứng dụng client. Có thời hạn ngắn (mặc định 1 giờ), chứa email và role của người dùng.
+   * **Refresh Token**: Được lưu trữ dưới dạng Cookie HttpOnly có thuộc tính `SameSite=Lax`, `Secure=false` (ở dev) và `Path="/"`. Có thời hạn dài (mặc định 7 ngày).
+2. **Cơ chế xoay vòng Refresh Token (Rotation - RTR)**:
+   * Mỗi khi client gọi `/api/auth/refresh` bằng cookie Refresh Token hợp lệ, server bắt buộc phải hủy token cũ, phát hành đồng thời cả Access Token mới và **Refresh Token mới** trả lại cookie client.
+   * Danh sách Refresh Token kích hoạt được lưu trữ ở **Redis** dạng `refresh_token:<email>` với thời gian sống (TTL) 7 ngày. Khi đăng xuất, token này sẽ bị xóa khỏi Redis ngay lập tức.
+3. **Quy trình Đăng ký an toàn bằng OTP**:
+   * Client bắt buộc phải đi qua 3 bước: Nhập email -> Gửi OTP (lưu Redis 5 phút TTL) -> Xác nhận OTP.
+   * Khi OTP trùng khớp, server tạo một vé trạng thái xác minh thành công trên Redis dưới dạng `otp:verified:<email> = true` với thời gian tồn tại là 10 phút.
+   * Bước cuối cùng (Submit Form tạo mật khẩu và lưu database), Backend bắt buộc phải kiểm tra vé verify này trong Redis. Nếu không tìm thấy, từ chối đăng ký với mã lỗi `1011 EMAIL_NOT_VERIFIED`. Sau khi đăng ký thành công, xóa ngay vé này khỏi Redis.
+4. **Cơ chế CORS và Credentials Sharing**:
+   * Mọi cấu hình CORS của Spring Boot bắt buộc phải cấu hình `allowCredentials(true)` và chỉ định chính xác nguồn gốc (Allowed Origin) như `http://localhost:5173`. Nghiêm cấm sử dụng wildcard `*` vì trình duyệt sẽ từ chối truyền tải cookies bảo mật HttpOnly.
+
+### 6.5. Quy chuẩn sử dụng Java Record cho DTO (Data Transfer Objects)
+Để tăng tính bất biến (immutability), tính rõ ràng và giảm thiểu code boilerplate từ Lombok, toàn bộ các lớp DTO (bao gồm cả **Request DTO** và **Response DTO**) bắt buộc phải sử dụng kiểu **Java Record** (tính năng tiêu chuẩn từ Java 16+):
+- **Tính bất biến (Immutability)**: DTO sinh ra chỉ để vận chuyển dữ liệu, do đó các trường dữ liệu phải là `final`. Việc sử dụng `record` giúp đảm bảo tính bất biến này một cách tự nhiên.
+- **Loại bỏ Boilerplate**: Không cần khai báo thủ công hoặc dùng Lombok annotations như `@Getter`, `@Setter`, `@NoArgsConstructor`, `@AllArgsConstructor`. Các phương thức truy cập dữ liệu (accessor), `equals()`, `hashCode()`, và `toString()` được Java tự động tạo ra.
+- **Tích hợp Validation**: Các annotations ràng buộc dữ liệu (`@NotBlank`, `@Email`, `@Size`...) được khai báo trực tiếp trên các tham số của record.
+- **Sử dụng Lombok @Builder**: Vẫn khuyến khích sử dụng `@Builder` của Lombok trên định nghĩa record để hỗ trợ tạo dữ liệu fluent-style trong phần Service.
+- **Ví dụ minh họa**:
+  ```java
+  package com.cinema.vncinema.dto.request;
+
+  import jakarta.validation.constraints.Email;
+  import jakarta.validation.constraints.NotBlank;
+  import lombok.Builder;
+
+  @Builder
+  public record LoginRequest(
+      @NotBlank(message = "Email is required")
+      @Email(message = "Invalid email format")
+      String email,
+
+      @NotBlank(message = "Password is required")
+      String password
+  ) {}
+  ```
+- **Lưu ý khi sử dụng**: Phương thức truy cập dữ liệu của record sẽ có tên trùng với tên trường (ví dụ: `request.email()` thay vì `request.getEmail()`). Hãy cập nhật các Controller và Service tương ứng.
+
+---
+
+## 7. Quy chuẩn Phát triển Frontend (Frontend Design Standards)
+Để đảm bảo mã nguồn frontend sạch sẽ, dễ bảo trì và dễ mở rộng, quy trình phát triển giao diện React bắt buộc phải tuân thủ các quy tắc sau:
+
+### 7.1. Phân tách Component (Component Modularization)
+* **Tuyệt đối không viết trang kiểu nguyên khối (Monolithic Pages)**: Mọi trang (page) lớn chứa nhiều phần nội dung (như trang chủ `Home`, trang chi tiết `MovieDetail`) không được phép gộp tất cả code JSX, state và timer vào chung một file duy nhất.
+* **Gom nhóm theo nghiệp vụ (Domain-based folders)**: Khi tách một phần giao diện ra component con bổ trợ cho trang chính, hãy đặt chúng vào thư mục gom nhóm tương ứng trong `src/components/` (ví dụ: `src/components/home/`, `src/components/movie/`).
+
+### 7.2. Phân chia trách nhiệm rõ ràng (Separation of Concerns)
+1. **Trang chính (Page Component)**:
+   * Đóng vai trò là **Bộ điều phối (Orchestrator / Assembly Container)**.
+   * Chỉ quản lý: Routing params, các State dùng chung toàn cục (ví dụ: bước đặt vé hiện tại, danh sách ghế đã chọn, thông tin phim đã tải) và điều hướng trang (`useNavigate`).
+   * Lắp ghép các component con thành giao diện hoàn chỉnh bằng cách truyền dữ liệu và các hàm callback điều khiển xuống dưới qua Props.
+2. **Component con (Sub-components)**:
+   * Chịu trách nhiệm hiển thị một phần giao diện cụ thể (ví dụ: `HeroSection`, `ShowtimeStep`, `SeatStep`).
+   * Tự cô lập và quản lý các State nội bộ cục bộ (ví dụ: slider index hiện tại, timer tự động chuyển slide).
+   * Đóng gói toàn bộ các hiệu ứng chuyển động chuyên sâu (`Framer Motion`, CSS transitions).
+
+### 7.3. Sẵn sàng tích hợp API (API Readiness)
+* Các component con hiển thị dữ liệu hoặc danh sách (như Slider phim, Lưới phim đang chiếu, Lịch chiếu) bắt buộc phải nhận dữ liệu động thông qua **Props** thay vì hardcode trực tiếp việc import dữ liệu giả (mock data).
+* Cách thiết kế này đảm bảo khi kết nối ứng dụng với Spring Boot API, chúng ta chỉ cần cập nhật API call ở trang chính (Page level) và truyền dữ liệu xuống, hoàn toàn không cần chỉnh sửa hay đụng vào code hiển thị của các component con.
