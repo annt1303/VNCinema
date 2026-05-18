@@ -174,7 +174,7 @@ export default function MovieDetail() {
 
                 {/* Showtime Selection */}
                 <div>
-                  <h3 className="text-white font-medium mb-4 flex items-center gap-2"><MapPin size={20} className="text-primary" /> CineMax Trần Duy Hưng</h3>
+                  <h3 className="text-white font-medium mb-4 flex items-center gap-2"><MapPin size={20} className="text-primary" /> CineVN Trần Duy Hưng</h3>
                   <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
                     {showtimes.map((st) => (
                       <button
@@ -280,7 +280,7 @@ export default function MovieDetail() {
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <span className="text-gray-500 text-sm block">Rạp</span>
-                        <span className="text-white font-medium">CineMax Trần Duy Hưng</span>
+                        <span className="text-white font-medium">VNCinema Trần Duy Hưng</span>
                       </div>
                       <div>
                         <span className="text-gray-500 text-sm block">Suất chiếu</span>

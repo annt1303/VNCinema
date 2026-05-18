@@ -1,4 +1,4 @@
-# CineMax - Movie Ticketing System Context
+# CineVN - Movie Ticketing System Context
 
 ## 1. Tổng quan kiến trúc (Architecture Overview)
 Dự án là một hệ thống đặt vé xem phim trực tuyến hiện đại, bao gồm hai phần chính:
@@ -66,3 +66,44 @@ Dự án sẽ có một file `docker-compose.yml` định nghĩa các container:
 2. `redis-cache`: Container chứa Redis.
 3. `spring-backend`: Container chạy file `.jar` của Spring Boot (kết nối với Postgres và Redis).
 4. `react-frontend`: Container chạy Nginx để serve ứng dụng React.js đã được build.
+
+---
+
+## 5. Cấu trúc thư mục (Package Structure)
+Dự án được tổ chức theo kiến trúc hướng tính năng (Feature-driven) kết hợp phân lớp (Layered Architecture).
+
+### 5.1. Backend (Spring Boot)
+Thư mục gốc: `src/main/java/com/cinema/vncinema`
+- `config/`: Cấu hình hệ thống (Security, Redis, WebSocket, OpenAPI, CORS)
+- `controller/`: RESTful APIs (nhận request từ Frontend)
+  - `auth/`: API Đăng nhập, đăng ký
+  - `admin/`: API dành riêng cho trang quản trị
+  - `public/`: API xem phim, lịch chiếu...
+- `service/`: Chứa logic nghiệp vụ (Business logic)
+  - `impl/`: Triển khai các interface của service
+- `repository/`: Giao tiếp với Database (Spring Data JPA)
+- `entity/`: Các Entity ánh xạ với bảng trong PostgreSQL (User, Movie, Ticket, Seat...)
+- `dto/`: Data Transfer Objects (Request/Response data payload)
+  - `request/`
+  - `response/`
+- `exception/`: Xử lý lỗi tập trung (GlobalExceptionHandler, Custom Exceptions)
+- `security/`: Cấu hình JWT, Filters, UserDetails...
+- `websocket/`: Xử lý realtime giữ ghế, nhả ghế qua STOMP
+- `utils/`: Các hàm tiện ích (mã hóa mật khẩu, format dữ liệu)
+
+### 5.2. Frontend (React.js)
+Thư mục gốc: `frontend/src`
+- `assets/`: Hình ảnh, icon, font chữ tĩnh
+- `components/`: Các Component dùng chung
+  - `ui/`: Component cơ bản (Button, Input, Modal, Badge...)
+  - `layout/`: Bố cục trang (Navbar, Footer, Sidebar, AdminLayout)
+  - `specific/`: Component nghiệp vụ (MovieCard, SeatMap, TicketQR...)
+- `pages/`: Các trang chính của ứng dụng
+  - `admin/`: Dashboard quản trị
+  - `auth/`: Login, Register
+  - `public/`: Home, MovieDetail, Booking, Checkout, Profile
+- `services/`: Chứa các file gọi API tới Backend
+- `hooks/`: Custom React Hooks
+- `context/`: React Context API / Zustand (Quản lý State toàn cục)
+- `routes/`: Cấu hình React Router (Public routes, Private routes, Admin routes)
+- `utils/`: Các hàm tiện ích (formatters, cn.js...)

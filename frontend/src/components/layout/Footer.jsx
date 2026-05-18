@@ -66,7 +66,7 @@ export default function Footer() {
         </div>
 
         <div className="pt-8 border-t border-white/5 text-center text-gray-500 text-sm">
-          <p>© {new Date().getFullYear()} CineMax. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} CineVN. All rights reserved.</p>
         </div>
       </div>
     </footer>

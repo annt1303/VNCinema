@@ -42,7 +42,7 @@ export default function Navbar() {
               <Film size={24} />
             </motion.div>
             <span className="text-2xl font-bold tracking-tight text-white">
-              Cine<span className="text-primary">Max</span>
+              Cine<span className="text-primary">VN</span>
             </span>
           </Link>
 

@@ -53,7 +53,7 @@ export default function Home() {
             >
               <div className="flex items-center gap-3 mb-4">
                 <span className="px-3 py-1 bg-primary/20 text-primary border border-primary/30 rounded-full text-xs font-semibold backdrop-blur-sm">
-                  CineMax Độc Quyền
+                  CineVN Độc Quyền
                 </span>
                 <span className="text-gray-300 text-sm">{heroMovies[currentHeroIndex].releaseDate}</span>
               </div>
@@ -124,7 +124,7 @@ export default function Home() {
             <div className="absolute -left-20 -bottom-20 w-64 h-64 bg-accent/20 rounded-full blur-3xl"></div>
             
             <div className="relative z-10 max-w-xl">
-              <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Thành viên CineMax Club</h2>
+              <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Thành viên VNCinema Club</h2>
               <p className="text-gray-300 mb-6 text-lg">Đăng ký thành viên ngay hôm nay để nhận ưu đãi lên đến 20% cho lần mua vé đầu tiên và tích điểm đổi quà hấp dẫn.</p>
               <button className="px-8 py-3 bg-white text-background hover:bg-gray-200 rounded-full font-bold transition-colors">
                 Đăng Ký Ngay
