@@ -13,4 +13,6 @@ public final class AuthMessages {
     public static final String REFRESH_SUCCESS = "Token refreshed successfully";
     public static final String LOGOUT_SUCCESS = "Logout successful";
     public static final String PROFILE_SUCCESS = "Profile retrieved successfully";
+    public static final String UPDATE_PROFILE_SUCCESS = "Profile updated successfully";
+    public static final String CHANGE_PASSWORD_SUCCESS = "Password changed successfully";
 }

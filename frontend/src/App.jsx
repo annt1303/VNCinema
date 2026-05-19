@@ -5,6 +5,7 @@ import Home from "./pages/Home";
 import MovieDetail from "./pages/MovieDetail";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
+import Profile from "./pages/public/Profile";
 import { AuthProvider } from "./context/AuthContext";
 
 function App() {
@@ -19,6 +20,7 @@ function App() {
               <Route path="/movie/:id" element={<MovieDetail />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+              <Route path="/profile" element={<Profile />} />
               {/* Fallback route */}
               <Route path="*" element={<Home />} />
             </Routes>

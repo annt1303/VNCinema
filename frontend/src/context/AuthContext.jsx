@@ -76,6 +76,28 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const updateProfile = async (profileData) => {
+    try {
+      const data = await api.put('/api/user/profile', profileData);
+      if (data.accessToken) {
+        setAccessToken(data.accessToken);
+      }
+      const updatedUser = data.user || data;
+      setUser(updatedUser);
+      return updatedUser;
+    } catch (err) {
+      throw new Error(err.message || 'Cập nhật thông tin thất bại');
+    }
+  };
+
+  const changePassword = async (passwordData) => {
+    try {
+      await api.put('/api/user/change-password', passwordData);
+    } catch (err) {
+      throw new Error(err.message || 'Đổi mật khẩu thất bại');
+    }
+  };
+
   const sendOtp = async (email) => {
     try {
       await api.post('/api/auth/otp/send', { email });
@@ -100,6 +122,8 @@ export const AuthProvider = ({ children }) => {
     logout,
     sendOtp,
     verifyOtp,
+    updateProfile,
+    changePassword,
     isAuthenticated: !!user,
     isAdmin: user?.role === 'ADMIN',
   };

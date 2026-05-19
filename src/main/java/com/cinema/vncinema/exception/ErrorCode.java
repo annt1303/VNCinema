@@ -19,6 +19,8 @@ public enum ErrorCode {
     EMAIL_NOT_VERIFIED(1011, "Email has not been verified with OTP", HttpStatus.BAD_REQUEST),
     INVALID_CREDENTIALS(1012, "Incorrect email or password", HttpStatus.BAD_REQUEST),
     REFRESH_TOKEN_EXPIRED(1013, "Refresh token has expired, please log in again", HttpStatus.UNAUTHORIZED),
+    INVALID_OLD_PASSWORD(1014, "Current password is incorrect", HttpStatus.BAD_REQUEST),
+    SAME_PASSWORD(1015, "New password must be different from the current password", HttpStatus.BAD_REQUEST),
     ;
 
     private final int code;
