@@ -5,6 +5,7 @@ import com.cinema.vncinema.dto.request.SeatLayoutRequest;
 import com.cinema.vncinema.dto.response.ScreenRoomResponse;
 import com.cinema.vncinema.dto.response.SeatResponse;
 import com.cinema.vncinema.entity.Cinema;
+import com.cinema.vncinema.entity.RoomType;
 import com.cinema.vncinema.entity.ScreenRoom;
 import com.cinema.vncinema.entity.Seat;
 import com.cinema.vncinema.exception.AppException;
@@ -105,6 +106,7 @@ public class ScreenRoomServiceImpl implements ScreenRoomService {
 
         screenRoom.setName(request.name());
         screenRoom.setCinema(cinema);
+        screenRoom.setRoomType(request.roomType());
 
         // Update seats if provided
         if (request.seats() != null) {
@@ -150,6 +152,7 @@ public class ScreenRoomServiceImpl implements ScreenRoomService {
                 .name(response.name())
                 .cinemaId(response.cinemaId())
                 .cinemaName(response.cinemaName())
+                .roomType(response.roomType())
                 .totalSeats(response.totalSeats())
                 .isActive(response.isActive())
                 .seats(seatResponses)

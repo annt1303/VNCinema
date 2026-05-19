@@ -42,6 +42,7 @@ export default function RoomTab({
           <thead>
             <tr className="border-b border-white/5 bg-white/2 text-zinc-400 text-xs font-bold uppercase tracking-wider">
               <th className="px-6 py-4">Tên phòng chiếu</th>
+              <th className="px-6 py-4">Loại phòng</th>
               <th className="px-6 py-4">Số ghế hoạt động</th>
               <th className="px-6 py-4">Trạng thái</th>
               <th className="px-6 py-4 text-right">Thao tác</th>
@@ -50,7 +51,7 @@ export default function RoomTab({
           <tbody className="divide-y divide-white/5 text-sm text-zinc-300">
             {rooms.length === 0 ? (
               <tr>
-                <td colSpan="4" className="text-center py-10 text-zinc-500 font-medium">
+                <td colSpan="5" className="text-center py-10 text-zinc-500 font-medium">
                   Chưa có phòng chiếu nào tại rạp này.
                 </td>
               </tr>
@@ -62,6 +63,19 @@ export default function RoomTab({
                       <Tv size={18} />
                     </div>
                     {room.name}
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className={`inline-block px-2.5 py-1 rounded-full text-xs font-bold ${
+                      room.roomType === "IMAX"
+                        ? "bg-blue-500/10 text-blue-400 border border-blue-500/20"
+                        : room.roomType === "GOLD_CLASS"
+                        ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                        : room.roomType === "DELUXE"
+                        ? "bg-purple-500/10 text-purple-400 border border-purple-500/20"
+                        : "bg-zinc-800 text-zinc-300"
+                    }`}>
+                      {room.roomType || "STANDARD"}
+                    </span>
                   </td>
                   <td className="px-6 py-4">
                     <span className="bg-zinc-800 text-zinc-300 px-2.5 py-1 rounded-full text-xs font-bold">

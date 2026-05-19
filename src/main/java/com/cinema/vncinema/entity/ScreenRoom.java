@@ -19,6 +19,11 @@ public class ScreenRoom extends BaseEntity {
     @JoinColumn(name = "cinema_id", nullable = false)
     private Cinema cinema;
 
+    @Column(name = "room_type", nullable = false)
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private RoomType roomType = RoomType.STANDARD;
+
     @Column(name = "total_seats", nullable = false)
     @Builder.Default
     private Integer totalSeats = 0;

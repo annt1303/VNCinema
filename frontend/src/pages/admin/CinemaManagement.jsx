@@ -28,7 +28,7 @@ export default function CinemaManagement() {
 
   const [showRoomModal, setShowRoomModal] = useState(false);
   const [editingRoom, setEditingRoom] = useState(null);
-  const [roomForm, setRoomForm] = useState({ name: "", rowsCount: 8, colsCount: 12 });
+  const [roomForm, setRoomForm] = useState({ name: "", rowsCount: 8, colsCount: 12, roomType: "STANDARD" });
   const [seatsGrid, setSeatsGrid] = useState({}); // Key: row_col, Val: { rowName, seatNumber, seatType, isActive }
   const [selectedTool, setSelectedTool] = useState("NORMAL"); // NORMAL, VIP, COUPLE, INACTIVE
 
@@ -186,7 +186,8 @@ export default function CinemaManagement() {
     setRoomForm({
       name: room.name,
       rowsCount: maxRow,
-      colsCount: maxCol
+      colsCount: maxCol,
+      roomType: room.roomType || "STANDARD"
     });
     setSeatsGrid(grid);
   };
@@ -225,7 +226,7 @@ export default function CinemaManagement() {
       return;
     }
     setEditingRoom(null);
-    setRoomForm({ name: "", rowsCount: 8, colsCount: 12 });
+    setRoomForm({ name: "", rowsCount: 8, colsCount: 12, roomType: "STANDARD" });
     generateBlankGrid(8, 12);
     setShowRoomModal(true);
   };
@@ -301,6 +302,7 @@ export default function CinemaManagement() {
     const body = {
       name: roomForm.name,
       cinemaId: parseInt(selectedCinemaId),
+      roomType: roomForm.roomType,
       seats: seatsArray
     };
 

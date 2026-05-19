@@ -1,5 +1,6 @@
 package com.cinema.vncinema.dto.request;
 
+import com.cinema.vncinema.entity.RoomType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
@@ -12,6 +13,9 @@ public record ScreenRoomRequest(
 
     @NotNull(message = "Cinema ID is required")
     Long cinemaId,
+
+    @NotNull(message = "Room type is required")
+    RoomType roomType,
 
     List<SeatLayoutRequest> seats
 ) {}

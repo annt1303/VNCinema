@@ -46,7 +46,7 @@ export default function RoomModal({
 
         <form onSubmit={onSubmit} className="space-y-4">
           {/* Step 1: Info config */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-zinc-950 p-4 rounded-xl border border-white/5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 bg-zinc-950 p-4 rounded-xl border border-white/5">
             <div>
               <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1.5">Tên phòng chiếu *</label>
               <input
@@ -57,6 +57,20 @@ export default function RoomModal({
                 placeholder="Ví dụ: Phòng chiếu 01"
                 className="w-full bg-zinc-900 border border-white/10 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-rose-500 transition-colors"
               />
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1.5">Loại phòng chiếu *</label>
+              <select
+                value={roomForm.roomType || "STANDARD"}
+                onChange={(e) => setRoomForm({ ...roomForm, roomType: e.target.value })}
+                className="w-full bg-zinc-900 border border-white/10 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-rose-500 transition-colors cursor-pointer"
+              >
+                <option value="STANDARD">Standard</option>
+                <option value="IMAX">IMAX</option>
+                <option value="GOLD_CLASS">Gold Class</option>
+                <option value="DELUXE">Deluxe</option>
+              </select>
             </div>
 
             <div>
