@@ -283,3 +283,12 @@ public interface MovieMapper {
 ### 7.3. Sẵn sàng tích hợp API (API Readiness)
 * Các component con hiển thị dữ liệu hoặc danh sách (như Slider phim, Lưới phim đang chiếu, Lịch chiếu) bắt buộc phải nhận dữ liệu động thông qua **Props** thay vì hardcode trực tiếp việc import dữ liệu giả (mock data).
 * Cách thiết kế này đảm bảo khi kết nối ứng dụng với Spring Boot API, chúng ta chỉ cần cập nhật API call ở trang chính (Page level) và truyền dữ liệu xuống, hoàn toàn không cần chỉnh sửa hay đụng vào code hiển thị của các component con.
+
+### 7.4. Quy chuẩn Thiết kế Responsive (Responsive Design Standards)
+* **Hỗ trợ đa thiết bị (Multi-device Support)**: Tất cả giao diện người dùng (bao gồm cả User Frontend và Admin Dashboard) bắt buộc phải thiết kế responsive, tương thích mượt mà trên tất cả các kích thước màn hình phổ biến:
+  * **Mobile (Điện thoại)**: `< 768px` (ưu tiên giao diện một cột, menu điều hướng dạng hamburger, thu gọn các thành phần không cần thiết và tối ưu hóa nút bấm lớn để dễ tương tác bằng ngón tay).
+  * **Tablet (Máy tính bảng)**: `768px` đến `1024px` (giao diện điều chỉnh linh hoạt từ 2-3 cột, các thành phần lưới/danh sách hiển thị vừa vặn).
+  * **Desktop (Máy tính để bàn)**: `> 1024px` (giao diện đầy đủ tính năng, hiển thị tối đa thông tin, khoảng cách thoáng đãng và có hiệu ứng chuyển động mượt mà).
+* **Sử dụng CSS/Tailwind Breakpoints**: Tận dụng triệt để các breakpoint chuẩn của Tailwind CSS (`sm:`, `md:`, `lg:`, `xl:`) để linh hoạt thay đổi bố cục, căn chỉnh khoảng cách (`padding`/`margin`), kích thước chữ và hiển thị/ẩn các phần tử cho phù hợp với từng kích thước viewport.
+* **Kiểm thử Responsive**: Trước khi hoàn thành tính năng, nhà phát triển bắt buộc phải tự kiểm thử giao diện bằng công cụ mô phỏng thiết bị trên Chrome DevTools. Đặc biệt chú ý đến luồng đặt vé, sơ đồ chọn ghế, hiển thị vé QR, thanh toán, và các bảng dữ liệu quản trị (data tables) trên giao diện mobile để đảm bảo không bị tràn hay vỡ giao diện.
+
