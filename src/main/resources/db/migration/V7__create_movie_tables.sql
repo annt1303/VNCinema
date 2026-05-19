@@ -1,0 +1,30 @@
+CREATE TABLE genres (
+    id BIGSERIAL PRIMARY KEY,
+    tmdb_genre_id INT UNIQUE,
+    name VARCHAR(255) NOT NULL UNIQUE,
+    created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE movies (
+    id BIGSERIAL PRIMARY KEY,
+    tmdb_id BIGINT UNIQUE,
+    title VARCHAR(255) NOT NULL,
+    original_title VARCHAR(255),
+    overview TEXT,
+    duration INT NOT NULL,
+    release_date DATE,
+    poster_path VARCHAR(255),
+    backdrop_path VARCHAR(255),
+    trailer_url VARCHAR(255),
+    vote_average DOUBLE PRECISION,
+    status VARCHAR(50) NOT NULL DEFAULT 'UPCOMING',
+    created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE movie_genres (
+    movie_id BIGINT REFERENCES movies(id) ON DELETE CASCADE,
+    genre_id BIGINT REFERENCES genres(id) ON DELETE CASCADE,
+    PRIMARY KEY (movie_id, genre_id)
+);

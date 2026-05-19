@@ -10,6 +10,7 @@ import AdminLayout from "./components/layout/AdminLayout";
 import AdminRoute from "./routes/AdminRoute";
 import Dashboard from "./pages/admin/Dashboard";
 import CinemaManagement from "./pages/admin/CinemaManagement";
+import MovieManagement from "./pages/admin/MovieManagement";
 import { AuthProvider } from "./context/AuthContext";
 
 function App() {
@@ -37,6 +38,7 @@ function App() {
               >
                 <Route index element={<Dashboard />} />
                 <Route path="cinemas" element={<CinemaManagement />} />
+                <Route path="movies" element={<MovieManagement />} />
               </Route>
 
               {/* Fallback route */}

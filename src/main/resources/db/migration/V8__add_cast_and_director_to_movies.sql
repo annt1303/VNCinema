@@ -1,0 +1,2 @@
+ALTER TABLE movies ADD COLUMN cast_info TEXT;
+ALTER TABLE movies ADD COLUMN director VARCHAR(255);

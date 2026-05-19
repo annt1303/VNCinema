@@ -1,0 +1,155 @@
+import React, { useState, useEffect } from "react";
+import { Plus, Search, Calendar, Clock, Star, Film, Loader2 } from "lucide-react";
+import { api } from "../../services/api";
+import TmdbSearchModal from "../../components/admin/movie/TmdbSearchModal";
+
+export default function MovieManagement() {
+  const [movies, setMovies] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [isTmdbModalOpen, setIsTmdbModalOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [error, setError] = useState(null);
+
+  const fetchMovies = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const result = await api.get("/api/admin/movies");
+      setMovies(result || []);
+    } catch (err) {
+      setError(err.message || "Có lỗi xảy ra khi tải dữ liệu.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchMovies();
+  }, []);
+
+  const filteredMovies = movies.filter((movie) =>
+    movie.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (movie.originalTitle && movie.originalTitle.toLowerCase().includes(searchQuery.toLowerCase()))
+  );
+
+  return (
+    <div className="space-y-6 pb-12">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-zinc-900 border border-white/5 p-6 rounded-2xl relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-rose-600/5 rounded-full blur-3xl pointer-events-none -translate-y-1/2 translate-x-1/3" />
+        
+        <div className="relative z-10">
+          <h1 className="text-2xl font-bold text-white flex items-center gap-3">
+            <Film className="w-7 h-7 text-rose-500" />
+            Quản lý Phim
+          </h1>
+          <p className="text-zinc-400 text-sm mt-2">
+            Xem danh sách phim trong hệ thống và nhập dữ liệu phim mới từ hệ thống TMDB
+          </p>
+        </div>
+        
+        <button 
+          onClick={() => setIsTmdbModalOpen(true)} 
+          className="relative z-10 bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-400 text-white px-5 py-2.5 rounded-xl font-semibold shadow-lg shadow-rose-600/20 transition-all flex items-center gap-2"
+        >
+          <Plus className="w-5 h-5" /> Nhập từ TMDB
+        </button>
+      </div>
+
+      {/* Toolbar */}
+      <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+        <div className="relative w-full md:w-96">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
+          <input
+            type="text"
+            placeholder="Tìm kiếm phim trong hệ thống..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full bg-zinc-900 border border-white/10 text-white rounded-xl pl-10 pr-4 py-2.5 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500/30 transition-all text-sm"
+          />
+        </div>
+        
+        <div className="text-zinc-400 text-sm w-full md:w-auto text-left md:text-right">
+          Tổng cộng: <span className="font-bold text-white">{filteredMovies.length}</span> phim
+        </div>
+      </div>
+
+      {/* Content */}
+      {error && (
+        <div className="bg-rose-500/10 border border-rose-500/20 text-rose-400 p-4 rounded-xl text-center">
+          {error}
+        </div>
+      )}
+
+      {loading ? (
+        <div className="flex justify-center items-center h-64">
+          <Loader2 className="w-8 h-8 text-rose-500 animate-spin" />
+        </div>
+      ) : filteredMovies.length === 0 ? (
+        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-12 text-center flex flex-col items-center justify-center gap-3">
+          <Film className="w-12 h-12 text-zinc-700" />
+          <p className="text-zinc-400 font-medium">Chưa có phim nào trong hệ thống hoặc không tìm thấy phim phù hợp.</p>
+          <button 
+            onClick={() => setIsTmdbModalOpen(true)}
+            className="text-rose-500 hover:text-rose-400 text-sm font-semibold mt-2"
+          >
+            Nhập phim đầu tiên từ TMDB
+          </button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
+          {filteredMovies.map((movie) => (
+            <div key={movie.id} className="bg-zinc-900 rounded-2xl overflow-hidden border border-white/5 hover:border-zinc-700 hover:-translate-y-1 transition-all duration-300 group flex flex-col shadow-lg shadow-black/20">
+              <div className="relative aspect-[2/3] overflow-hidden bg-zinc-800">
+                {movie.posterPath ? (
+                  <img
+                    src={`https://image.tmdb.org/t/p/w500${movie.posterPath}`}
+                    alt={movie.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                    loading="lazy"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <Film className="w-12 h-12 text-zinc-700" />
+                  </div>
+                )}
+                
+                <div className="absolute top-2 right-2 bg-black/70 backdrop-blur-md text-yellow-400 text-xs font-bold px-2 py-1 rounded-md flex items-center gap-1 border border-white/10 shadow-sm">
+                  <Star className="w-3 h-3 fill-current" />
+                  {movie.voteAverage?.toFixed(1) || "N/A"}
+                </div>
+                
+                <div className="absolute top-2 left-2 bg-rose-600 text-white text-xs font-bold px-2 py-1 rounded-md shadow-sm">
+                  {movie.status === "UPCOMING" ? "Sắp chiếu" : movie.status === "NOW_SHOWING" ? "Đang chiếu" : "Ngừng chiếu"}
+                </div>
+              </div>
+              
+              <div className="p-4 flex flex-col flex-1">
+                <h3 className="font-bold text-white text-sm line-clamp-2 mb-1 group-hover:text-rose-400 transition-colors" title={movie.title}>
+                  {movie.title}
+                </h3>
+                
+                <div className="mt-auto pt-3 flex items-center justify-between text-xs font-medium text-zinc-400">
+                  <div className="flex items-center gap-1.5 bg-zinc-800/50 px-2 py-1 rounded-md">
+                    <Calendar className="w-3 h-3 text-zinc-500" />
+                    <span>{movie.releaseDate ? new Date(movie.releaseDate).getFullYear() : "—"}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 bg-zinc-800/50 px-2 py-1 rounded-md">
+                    <Clock className="w-3 h-3 text-zinc-500" />
+                    <span>{movie.duration}p</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <TmdbSearchModal
+        isOpen={isTmdbModalOpen}
+        onClose={() => setIsTmdbModalOpen(false)}
+        onImportSuccess={fetchMovies}
+      />
+    </div>
+  );
+}

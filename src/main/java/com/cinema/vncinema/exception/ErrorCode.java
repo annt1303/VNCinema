@@ -26,6 +26,8 @@ public enum ErrorCode {
     ROOM_EXISTED(1018, "Screen room with this name already exists in this cinema", HttpStatus.BAD_REQUEST),
     ROOM_NOT_FOUND(1019, "Screen room not found", HttpStatus.NOT_FOUND),
     INVALID_ROOM_SEAT_CONFIGURATION(1020, "Invalid seat layout configuration", HttpStatus.BAD_REQUEST),
+    MOVIE_EXISTED(1021, "Movie has already been imported", HttpStatus.BAD_REQUEST),
+    MOVIE_NOT_FOUND(1022, "Movie not found", HttpStatus.NOT_FOUND),
     ;
 
     private final int code;
