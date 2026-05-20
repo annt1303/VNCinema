@@ -1,5 +1,6 @@
 package com.cinema.vncinema.service.impl;
 
+import com.cinema.vncinema.dto.request.MovieRequest;
 import com.cinema.vncinema.dto.response.MovieResponse;
 import com.cinema.vncinema.dto.response.TmdbMovieDetailResponse;
 import com.cinema.vncinema.dto.response.TmdbSearchResponse;
@@ -127,4 +128,75 @@ public class MovieServiceImpl implements MovieService {
                 .map(movieMapper::toMovieResponse)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    @Transactional
+    public MovieResponse createMovie(MovieRequest request) {
+        Set<Genre> genres = new HashSet<>();
+        if (request.genreIds() != null) {
+            genres.addAll(genreRepository.findAllById(request.genreIds()));
+        }
+
+        String castString = request.cast() != null ? String.join(", ", request.cast()) : null;
+
+        Movie movie = Movie.builder()
+                .title(request.title())
+                .originalTitle(request.originalTitle())
+                .overview(request.overview())
+                .duration(request.duration())
+                .releaseDate(request.releaseDate())
+                .posterPath(request.posterPath())
+                .backdropPath(request.backdropPath())
+                .trailerUrl(request.trailerUrl())
+                .director(request.director())
+                .cast(castString)
+                .voteAverage(request.voteAverage())
+                .status(request.status())
+                .genres(genres)
+                .build();
+
+        Movie savedMovie = movieRepository.save(movie);
+        return movieMapper.toMovieResponse(savedMovie);
+    }
+
+    @Override
+    @Transactional
+    public MovieResponse updateMovie(Long id, MovieRequest request) {
+        Movie movie = movieRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.MOVIE_NOT_FOUND));
+
+        Set<Genre> genres = new HashSet<>();
+        if (request.genreIds() != null) {
+            genres.addAll(genreRepository.findAllById(request.genreIds()));
+        }
+
+        String castString = request.cast() != null ? String.join(", ", request.cast()) : null;
+
+        movie.setTitle(request.title());
+        movie.setOriginalTitle(request.originalTitle());
+        movie.setOverview(request.overview());
+        movie.setDuration(request.duration());
+        movie.setReleaseDate(request.releaseDate());
+        movie.setPosterPath(request.posterPath());
+        movie.setBackdropPath(request.backdropPath());
+        movie.setTrailerUrl(request.trailerUrl());
+        movie.setDirector(request.director());
+        movie.setCast(castString);
+        movie.setVoteAverage(request.voteAverage());
+        movie.setStatus(request.status());
+        movie.setGenres(genres);
+
+        Movie updatedMovie = movieRepository.save(movie);
+        return movieMapper.toMovieResponse(updatedMovie);
+    }
+
+    @Override
+    @Transactional
+    public void deleteMovie(Long id) {
+        if (!movieRepository.existsById(id)) {
+            throw new AppException(ErrorCode.MOVIE_NOT_FOUND);
+        }
+        movieRepository.deleteById(id);
+    }
 }
+
