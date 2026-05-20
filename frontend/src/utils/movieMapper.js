@@ -16,6 +16,7 @@ export const mapDbMovieToFrontend = (dbMovie) => {
     releaseDate: dbMovie.releaseDate,
     description: dbMovie.overview || "",
     director: dbMovie.director || "",
-    cast: dbMovie.cast || []
+    cast: dbMovie.cast || [],
+    trailerUrl: dbMovie.trailerUrl || ""
   };
 };
