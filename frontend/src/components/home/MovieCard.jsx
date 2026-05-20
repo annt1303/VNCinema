@@ -1,8 +1,32 @@
-import { motion } from "framer-motion";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Play, Star, Clock } from "lucide-react";
+import { Play, Star, Clock, X } from "lucide-react";
 
 export default function MovieCard({ movie, index }) {
+  const [showTrailer, setShowTrailer] = useState(false);
+
+  const getYoutubeEmbedUrl = (url) => {
+    if (!url) return "";
+    let videoId = "";
+    try {
+      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+      const match = url.match(regExp);
+      if (match && match[2].length === 11) {
+        videoId = match[2];
+      }
+    } catch (error) {
+      console.error("Failed to parse youtube url", error);
+    }
+    return videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=1` : url;
+  };
+
+  const handlePlayClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setShowTrailer(true);
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }}
@@ -17,12 +41,8 @@ export default function MovieCard({ movie, index }) {
       />
       
       {/* Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-5">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileHover={{ opacity: 1, y: 0 }}
-          className="translate-y-4 group-hover:translate-y-0 transition-all duration-300"
-        >
+      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-5 z-10 pointer-events-none group-hover:pointer-events-auto">
+        <div className="transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
           <div className="flex items-center gap-3 mb-3">
             <span className="flex items-center gap-1 text-yellow-400 text-sm font-medium">
               <Star size={14} fill="currentColor" /> {movie.rating}
@@ -47,18 +67,62 @@ export default function MovieCard({ movie, index }) {
             >
               Đặt vé
             </Link>
-            <button className="w-10 h-10 bg-white/10 hover:bg-white/20 backdrop-blur-md flex items-center justify-center rounded-lg text-white transition-colors">
-              <Play size={16} fill="currentColor" />
-            </button>
+            {movie.trailerUrl && (
+              <button
+                onClick={handlePlayClick}
+                className="w-10 h-10 bg-white/10 hover:bg-white/20 backdrop-blur-md flex items-center justify-center rounded-lg text-white transition-colors cursor-pointer"
+                title="Xem trailer"
+              >
+                <Play size={16} fill="currentColor" />
+              </button>
+            )}
           </div>
-        </motion.div>
+        </div>
       </div>
       
       {/* Persistent Title (when not hovered) */}
-      <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 to-transparent group-hover:opacity-0 transition-opacity duration-300">
+      <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 to-transparent group-hover:opacity-0 transition-opacity duration-300 pointer-events-none">
         <h3 className="text-white font-semibold line-clamp-1">{movie.title}</h3>
         <p className="text-primary text-sm">{movie.genre[0]}</p>
       </div>
+
+      {/* Trailer Modal */}
+      <AnimatePresence>
+        {showTrailer && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowTrailer(false)}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 p-4 md:p-10 backdrop-blur-sm pointer-events-auto"
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative w-full max-w-4xl aspect-video bg-zinc-950 rounded-2xl overflow-hidden shadow-2xl border border-zinc-800"
+            >
+              <button
+                onClick={() => setShowTrailer(false)}
+                className="absolute top-4 right-4 z-50 w-10 h-10 rounded-full bg-black/60 hover:bg-primary text-white flex items-center justify-center transition-colors cursor-pointer"
+                aria-label="Close trailer"
+              >
+                <X size={20} />
+              </button>
+              
+              <iframe
+                src={getYoutubeEmbedUrl(movie.trailerUrl)}
+                title={`${movie.title} Trailer`}
+                className="w-full h-full border-none"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+              ></iframe>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }
