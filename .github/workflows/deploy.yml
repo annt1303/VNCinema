@@ -86,6 +86,8 @@ jobs:
             DB_USER=${{ secrets.DB_USER }}
             DB_PASSWORD=${{ secrets.DB_PASSWORD }}
             REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
+            JWT_SECRET=${{ secrets.JWT_SECRET }}
+            TMDB_API_TOKEN=${{ secrets.TMDB_API_TOKEN }}
             EOF
 
             aws ecr get-login-password --region ap-southeast-1 | \
