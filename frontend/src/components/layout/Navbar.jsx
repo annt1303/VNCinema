@@ -20,7 +20,8 @@ export default function Navbar() {
   };
 
   const navLinks = [
-    { name: "Phim đang chiếu", path: "/" },
+    { name: "Trang chủ", path: "/" },
+    { name: "Phim đang chiếu", path: "/now-showing" },
     { name: "Sắp chiếu", path: "/coming-soon" },
     { name: "Rạp phim", path: "/cinemas" },
     { name: "Khuyến mãi", path: "/promotions" },
