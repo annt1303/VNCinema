@@ -37,7 +37,7 @@ export default function Footer() {
           <div>
             <h3 className="text-white font-semibold text-lg mb-6">Phim</h3>
             <ul className="space-y-4 text-gray-400">
-              <li><Link to="/" className="hover:text-primary transition-colors">Phim đang chiếu</Link></li>
+              <li><Link to="/now-showing" className="hover:text-primary transition-colors">Phim đang chiếu</Link></li>
               <li><Link to="/coming-soon" className="hover:text-primary transition-colors">Phim sắp chiếu</Link></li>
               <li><Link to="/top-rated" className="hover:text-primary transition-colors">Phim hay nhất</Link></li>
               <li><Link to="/promotions" className="hover:text-primary transition-colors">Khuyến mãi</Link></li>
