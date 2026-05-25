@@ -13,6 +13,7 @@ import CinemaManagement from "./pages/admin/CinemaManagement";
 import MovieManagement from "./pages/admin/MovieManagement";
 import ShowtimeManagement from "./pages/admin/ShowtimeManagement";
 import NowShowing from "./pages/NowShowing";
+import ComingSoon from "./pages/ComingSoon";
 import { AuthProvider } from "./context/AuthContext";
 
 function App() {
@@ -29,6 +30,7 @@ function App() {
               <Route path="/register" element={<Register />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/now-showing" element={<NowShowing />} />
+              <Route path="/coming-soon" element={<ComingSoon />} />
               
               {/* Admin Routes */}
               <Route

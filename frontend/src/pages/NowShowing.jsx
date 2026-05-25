@@ -2,14 +2,11 @@ import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import {
-  Search,
   LayoutGrid,
   List,
   Star,
   Clock,
   Play,
-  Filter,
-  X,
   ChevronRight,
   Film,
   SlidersHorizontal,
@@ -17,8 +14,6 @@ import {
 import { api } from "../services/api";
 import { mapDbMovieToFrontend } from "../utils/movieMapper";
 import TrailerModal from "../components/common/TrailerModal";
-
-const GENRES = ["Tất cả", "Hành động", "Tình cảm", "Hài", "Kinh dị", "Hoạt hình", "Khoa học viễn tưởng", "Tâm lý", "Phiêu lưu"];
 
 const SORT_OPTIONS = [
   { label: "Mới nhất", value: "newest" },
@@ -223,10 +218,7 @@ export default function NowShowing() {
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState("grid"); // "grid" | "list"
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedGenre, setSelectedGenre] = useState("Tất cả");
   const [sortBy, setSortBy] = useState("newest");
-  const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -244,34 +236,9 @@ export default function NowShowing() {
     fetchMovies();
   }, []);
 
-  // Extract all unique genres from fetched movies
-  const availableGenres = useMemo(() => {
-    const genreSet = new Set();
-    movies.forEach((m) => m.genre.forEach((g) => genreSet.add(g)));
-    return ["Tất cả", ...Array.from(genreSet)];
-  }, [movies]);
-
-  const displayGenres = availableGenres.length > 2 ? availableGenres : GENRES;
-
-  // Filter + sort
+  // Sort only
   const filteredMovies = useMemo(() => {
     let result = [...movies];
-
-    // Search
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      result = result.filter(
-        (m) =>
-          m.title.toLowerCase().includes(q) ||
-          (m.originalTitle && m.originalTitle.toLowerCase().includes(q)) ||
-          m.genre.some((g) => g.toLowerCase().includes(q))
-      );
-    }
-
-    // Genre filter
-    if (selectedGenre !== "Tất cả") {
-      result = result.filter((m) => m.genre.includes(selectedGenre));
-    }
 
     // Sort
     if (sortBy === "rating") {
@@ -287,7 +254,7 @@ export default function NowShowing() {
     }
 
     return result;
-  }, [movies, searchQuery, selectedGenre, sortBy]);
+  }, [movies, sortBy]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -352,215 +319,103 @@ export default function NowShowing() {
 
       {/* ── Controls Bar ── */}
       <div className="sticky top-[60px] z-30 bg-background/90 backdrop-blur-xl border-b border-white/5 shadow-lg">
-        <div className="container mx-auto px-4 md:px-6 py-3">
-          <div className="flex items-center gap-3 flex-wrap md:flex-nowrap">
-            {/* Search */}
-            <div className="relative flex-1 min-w-[200px]">
-              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
-              <input
-                type="text"
-                placeholder="Tìm kiếm phim..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-secondary/60 border border-white/5 text-white placeholder-gray-500 pl-9 pr-4 py-2.5 rounded-xl text-sm focus:outline-none focus:border-primary/50 focus:bg-secondary transition-all"
-              />
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery("")}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors cursor-pointer"
-                >
-                  <X size={14} />
-                </button>
-              )}
-            </div>
-
-            {/* Sort */}
-            <div className="relative">
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="appearance-none bg-secondary/60 border border-white/5 text-white pl-3 pr-8 py-2.5 rounded-xl text-sm focus:outline-none focus:border-primary/50 cursor-pointer transition-all"
-              >
-                {SORT_OPTIONS.map((opt) => (
-                  <option key={opt.value} value={opt.value} className="bg-zinc-900">
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
-              <SlidersHorizontal size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
-            </div>
-
-            {/* Filter toggle (mobile) */}
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className={`flex items-center gap-2 px-3 py-2.5 rounded-xl border text-sm font-medium transition-all cursor-pointer md:hidden ${
-                showFilters ? "bg-primary border-primary text-white" : "bg-secondary/60 border-white/5 text-gray-300 hover:border-white/20"
-              }`}
+        <div className="container mx-auto px-4 md:px-6 py-3 flex items-center justify-between">
+          {/* Sort */}
+          <div className="relative">
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="appearance-none bg-secondary/60 border border-white/5 text-white pl-3 pr-8 py-2.5 rounded-xl text-sm focus:outline-none focus:border-primary/50 cursor-pointer transition-all"
             >
-              <Filter size={15} />
-              Thể loại
-            </button>
+              {SORT_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value} className="bg-zinc-900">
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+            <SlidersHorizontal size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
+          </div>
 
-            {/* View mode */}
-            <div className="flex items-center bg-secondary/60 border border-white/5 rounded-xl p-1 ml-auto">
-              <button
-                onClick={() => setViewMode("grid")}
-                className={`p-2 rounded-lg transition-all cursor-pointer ${viewMode === "grid" ? "bg-primary text-white shadow-md" : "text-gray-400 hover:text-white"}`}
-                title="Dạng lưới"
-              >
-                <LayoutGrid size={16} />
-              </button>
-              <button
-                onClick={() => setViewMode("list")}
-                className={`p-2 rounded-lg transition-all cursor-pointer ${viewMode === "list" ? "bg-primary text-white shadow-md" : "text-gray-400 hover:text-white"}`}
-                title="Dạng danh sách"
-              >
-                <List size={16} />
-              </button>
-            </div>
+          {/* View mode */}
+          <div className="flex items-center bg-secondary/60 border border-white/5 rounded-xl p-1">
+            <button
+              onClick={() => setViewMode("grid")}
+              className={`p-2 rounded-lg transition-all cursor-pointer ${viewMode === "grid" ? "bg-primary text-white shadow-md" : "text-gray-400 hover:text-white"}`}
+              title="Dạng lưới"
+            >
+              <LayoutGrid size={16} />
+            </button>
+            <button
+              onClick={() => setViewMode("list")}
+              className={`p-2 rounded-lg transition-all cursor-pointer ${viewMode === "list" ? "bg-primary text-white shadow-md" : "text-gray-400 hover:text-white"}`}
+              title="Dạng danh sách"
+            >
+              <List size={16} />
+            </button>
           </div>
         </div>
       </div>
 
       {/* ── Main Content ── */}
       <div className="container mx-auto px-4 md:px-6 py-8">
-        <div className="flex gap-8">
-          {/* ── Sidebar Filters (desktop) ── */}
-          <aside className="hidden md:block w-56 flex-shrink-0">
-            <div className="sticky top-[130px] space-y-6">
-              <div>
-                <h3 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-3 flex items-center gap-2">
-                  <Filter size={12} /> Thể loại
-                </h3>
-                <div className="flex flex-col gap-1">
-                  {displayGenres.map((genre) => (
-                    <button
-                      key={genre}
-                      onClick={() => setSelectedGenre(genre)}
-                      className={`text-left px-3 py-2 rounded-xl text-sm font-medium transition-all cursor-pointer ${
-                        selectedGenre === genre
-                          ? "bg-primary/15 text-primary border border-primary/30"
-                          : "text-gray-400 hover:text-white hover:bg-white/5"
-                      }`}
-                    >
-                      {genre}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </aside>
-
-          {/* ── Movie Grid/List ── */}
-          <div className="flex-1 min-w-0">
-            {/* Mobile genre filter */}
-            <AnimatePresence>
-              {showFilters && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="md:hidden mb-5 overflow-hidden"
-                >
-                  <div className="flex flex-wrap gap-2 py-2">
-                    {displayGenres.map((genre) => (
-                      <button
-                        key={genre}
-                        onClick={() => { setSelectedGenre(genre); setShowFilters(false); }}
-                        className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all cursor-pointer border ${
-                          selectedGenre === genre
-                            ? "bg-primary border-primary text-white"
-                            : "border-white/10 text-gray-400 hover:border-white/30 hover:text-white"
-                        }`}
-                      >
-                        {genre}
-                      </button>
-                    ))}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            {/* Result info */}
-            <div className="flex items-center justify-between mb-6">
-              <p className="text-sm text-gray-500">
-                {loading ? (
-                  <span className="animate-pulse">Đang tải...</span>
-                ) : (
-                  <>
-                    Hiển thị{" "}
-                    <span className="text-white font-semibold">{filteredMovies.length}</span>{" "}
-                    {selectedGenre !== "Tất cả" && (
-                      <>trong thể loại <span className="text-primary font-semibold">{selectedGenre}</span></>
-                    )}
-                    {searchQuery && (
-                      <> cho "<span className="text-primary">{searchQuery}</span>"</>
-                    )}
-                  </>
-                )}
-              </p>
-
-              {(selectedGenre !== "Tất cả" || searchQuery) && !loading && (
-                <button
-                  onClick={() => { setSelectedGenre("Tất cả"); setSearchQuery(""); }}
-                  className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-white transition-colors cursor-pointer bg-white/5 hover:bg-white/10 px-3 py-1.5 rounded-full border border-white/5"
-                >
-                  <X size={12} /> Xóa bộ lọc
-                </button>
-              )}
-            </div>
-
-            {/* Loading skeletons */}
-            {loading && (
-              <div className={`grid gap-5 ${viewMode === "grid" ? "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5" : "grid-cols-1"}`}>
-                {Array.from({ length: 10 }).map((_, i) => (
-                  <SkeletonCard key={i} />
-                ))}
-              </div>
+        {/* Result info */}
+        <div className="flex items-center justify-between mb-6">
+          <p className="text-sm text-gray-500">
+            {loading ? (
+              <span className="animate-pulse">Đang tải...</span>
+            ) : (
+              <>
+                Hiển thị{" "}
+                <span className="text-white font-semibold">{filteredMovies.length}</span>{" "}
+                phim
+              </>
             )}
-
-            {/* Empty state */}
-            {!loading && filteredMovies.length === 0 && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="flex flex-col items-center justify-center py-24 text-center"
-              >
-                <div className="w-20 h-20 bg-white/5 rounded-2xl flex items-center justify-center mb-4">
-                  <Film size={36} className="text-gray-600" />
-                </div>
-                <h3 className="text-xl font-bold text-white mb-2">Không tìm thấy phim</h3>
-                <p className="text-gray-500 text-sm max-w-xs">
-                  Không có phim nào phù hợp với bộ lọc hiện tại. Hãy thử thay đổi thể loại hoặc từ khóa tìm kiếm.
-                </p>
-                <button
-                  onClick={() => { setSelectedGenre("Tất cả"); setSearchQuery(""); }}
-                  className="mt-6 flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors cursor-pointer"
-                >
-                  <X size={15} /> Xóa bộ lọc
-                </button>
-              </motion.div>
-            )}
-
-            {/* Movie Grid */}
-            {!loading && filteredMovies.length > 0 && viewMode === "grid" && (
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
-                {filteredMovies.map((movie, index) => (
-                  <GridMovieCard key={movie.id} movie={movie} index={index} />
-                ))}
-              </div>
-            )}
-
-            {/* Movie List */}
-            {!loading && filteredMovies.length > 0 && viewMode === "list" && (
-              <div className="flex flex-col gap-4">
-                {filteredMovies.map((movie, index) => (
-                  <ListMovieCard key={movie.id} movie={movie} index={index} />
-                ))}
-              </div>
-            )}
-          </div>
+          </p>
         </div>
+
+        {/* Loading skeletons */}
+        {loading && (
+          <div className={`grid gap-5 ${viewMode === "grid" ? "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5" : "grid-cols-1"}`}>
+            {Array.from({ length: 10 }).map((_, i) => (
+              <SkeletonCard key={i} />
+            ))}
+          </div>
+        )}
+
+        {/* Empty state */}
+        {!loading && filteredMovies.length === 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex flex-col items-center justify-center py-24 text-center"
+          >
+            <div className="w-20 h-20 bg-white/5 rounded-2xl flex items-center justify-center mb-4">
+              <Film size={36} className="text-gray-600" />
+            </div>
+            <h3 className="text-xl font-bold text-white mb-2">Không có phim</h3>
+            <p className="text-gray-500 text-sm max-w-xs">
+              Hiện tại không có phim nào đang chiếu.
+            </p>
+          </motion.div>
+        )}
+
+        {/* Movie Grid */}
+        {!loading && filteredMovies.length > 0 && viewMode === "grid" && (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
+            {filteredMovies.map((movie, index) => (
+              <GridMovieCard key={movie.id} movie={movie} index={index} />
+            ))}
+          </div>
+        )}
+
+        {/* Movie List */}
+        {!loading && filteredMovies.length > 0 && viewMode === "list" && (
+          <div className="flex flex-col gap-4">
+            {filteredMovies.map((movie, index) => (
+              <ListMovieCard key={movie.id} movie={movie} index={index} />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
