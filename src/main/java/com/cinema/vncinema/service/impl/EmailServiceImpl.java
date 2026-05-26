@@ -78,7 +78,7 @@ public class EmailServiceImpl implements EmailService {
 
             // QR code data: compact JSON-like string for the QR scanner
             String qrData = String.format(
-                    "VNCinema|%s|%s|%s|%s|%s|%s",
+                    "CineVN|%s|%s|%s|%s|%s|%s",
                     bookingCode, movieTitle, cinemaName, roomName, showtimeStr, seatList
             );
             // URL-encode the QR data
