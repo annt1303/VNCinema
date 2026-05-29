@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "../../utils/cn";
+import momoLogo from "../../assets/MOMO.png";
 
 const PAYMENT_METHODS = [
   {
@@ -15,7 +16,7 @@ const PAYMENT_METHODS = [
     id: "MOMO",
     name: "MoMo",
     desc: "Ví điện tử MoMo",
-    logo: "https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png",
+    logo: momoLogo,
     color: "#A50064",
     textColor: "#fff",
   },
